@@ -15,6 +15,7 @@ use App\Http\Controllers\Api\OfferController;
 use App\Http\Controllers\Api\OrderController;
 use App\Http\Controllers\Api\ProductController;
 use App\Http\Controllers\Api\ReportController;
+use App\Http\Controllers\Api\UploadController;
 use Illuminate\Support\Facades\DB;
 use Illuminate\Support\Facades\Route;
 
@@ -63,10 +64,26 @@ Route::middleware('auth:sanctum')->group(function () {
 
 // ---------- Administrador (token + rol admin) ----------
 Route::middleware(['auth:sanctum', 'admin'])->group(function () {
+    // Productos
     Route::post('/products', [ProductController::class, 'store']);
     Route::put('/products/{id}', [ProductController::class, 'update']);
     Route::delete('/products/{id}', [ProductController::class, 'destroy']);
+
+    // Categorías
     Route::get('/categories/products-count', [CategoryController::class, 'productsCount']);
+    Route::post('/categories', [CategoryController::class, 'store']);
+    Route::put('/categories/{id}', [CategoryController::class, 'update']);
+    Route::delete('/categories/{id}', [CategoryController::class, 'destroy']);
+
+    // Ofertas
+    Route::post('/offers', [OfferController::class, 'store']);
+    Route::put('/offers/{id}', [OfferController::class, 'update']);
+    Route::delete('/offers/{id}', [OfferController::class, 'destroy']);
+
+    // Banners
+    Route::post('/banners', [BannerController::class, 'store']);
+    Route::put('/banners/{id}', [BannerController::class, 'update']);
+    Route::delete('/banners/{id}', [BannerController::class, 'destroy']);
 
     Route::prefix('admin')->group(function () {
         Route::get('/dashboard', [DashboardController::class, 'summary']);
@@ -77,6 +94,10 @@ Route::middleware(['auth:sanctum', 'admin'])->group(function () {
         Route::put('/orders/{id}/payment', [AdminOrderController::class, 'updatePayment']);
 
         Route::get('/customers', [CustomerController::class, 'index']);
+
+        Route::get('/offers', [OfferController::class, 'adminIndex']);
+        Route::get('/banners', [BannerController::class, 'adminIndex']);
+        Route::post('/upload', [UploadController::class, 'store']);
 
         Route::get('/reports/sales', [ReportController::class, 'sales']);
         Route::get('/reports/top-products', [ReportController::class, 'topProducts']);
