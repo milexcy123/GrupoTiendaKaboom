@@ -21,7 +21,7 @@ class OfferController extends Controller
     // GET /api/offers (solo ofertas vigentes)
     public function index()
     {
-        $offers = Offer::with('product:id,name,price,image,stock,status')
+        $offers = Offer::with('product:id,company_id,name,price,image,stock,status')
             ->whereDate('start_date', '<=', today())
             ->whereDate('end_date', '>=', today())
             ->get()
