@@ -12,10 +12,13 @@ class AuthController extends Controller
     public function register(Request $request)
     {
         $data = $request->validate([
-            'name'     => 'required|string|max:255',
-            'email'    => 'required|email|unique:users,email',
-            'phone'    => 'nullable|string|max:20',
-            'password' => 'required|string|min:8',
+            'name'      => 'required|string|max:255',
+            'email'     => 'required|email|unique:users,email',
+            'phone'     => 'nullable|string|max:20',
+            'password'  => 'required|string|min:8',
+            'address'   => 'nullable|string|max:255',
+            'city'      => 'required_with:address|nullable|string|max:100',
+            'reference' => 'nullable|string|max:255',
         ]);
 
         // El rol siempre es "customer": nunca se recibe desde la petición
@@ -27,11 +30,20 @@ class AuthController extends Controller
             'role'     => 'customer',
         ]);
 
+        // Si el cliente escribió una dirección, se guarda de una vez
+        if (! empty($data['address'])) {
+            $user->addresses()->create([
+                'address'   => $data['address'],
+                'city'      => $data['city'],
+                'reference' => $data['reference'] ?? null,
+            ]);
+        }
+
         $token = $user->createToken('auth_token')->plainTextToken;
 
         return response()->json([
             'token' => $token,
-            'user'  => $user,
+            'user'  => $user->load('addresses'),
         ], 201);
     }
 
@@ -54,7 +66,7 @@ class AuthController extends Controller
 
         return response()->json([
             'token' => $token,
-            'user'  => $user,
+            'user'  => $user->load('addresses'),
         ], 200);
     }
 
@@ -69,6 +81,6 @@ class AuthController extends Controller
 
     public function user(Request $request)
     {
-        return response()->json($request->user(), 200);
+        return response()->json($request->user()->load('addresses'), 200);
     }
 }

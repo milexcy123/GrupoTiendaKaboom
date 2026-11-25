@@ -41,4 +41,27 @@ class Product extends Model
     {
         return $this->hasMany(Offer::class);
     }
+
+    // Oferta vigente con mayor descuento (o null si no hay ninguna)
+    public function activeOffer(): ?Offer
+    {
+        return $this->offers()
+            ->whereDate('start_date', '<=', today())
+            ->whereDate('end_date', '>=', today())
+            ->orderByDesc('discount')
+            ->first();
+    }
+
+    // Precio final: aplica la oferta vigente si existe
+    public function finalPrice(): float
+    {
+        $precio = (float) $this->price;
+        $oferta = $this->activeOffer();
+
+        if ($oferta) {
+            $precio = $precio * (1 - ((float) $oferta->discount) / 100);
+        }
+
+        return round($precio, 2);
+    }
 }
